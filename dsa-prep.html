@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Prep for Startup Coding Rounds</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#181b24; --panel-2:#1f2330; --line:#2a2f3d;
+    --text:#e7eaf0; --muted:#9aa3b2; --accent:#6ea8fe; --accent-2:#7ee787;
+    --easy:#7ee787; --medium:#f2cc60; --hard:#ff7b72;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#1b2030,transparent),var(--bg);
+    color:var(--text);line-height:1.5;padding:0 0 80px;
+  }
+  header{
+    padding:40px 24px 28px;max-width:1080px;margin:0 auto;
+  }
+  h1{font-size:30px;letter-spacing:-0.5px}
+  .sub{color:var(--muted);margin-top:8px;font-size:15px;max-width:680px}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* progress dashboard */
+  .dash{
+    display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;margin-bottom:24px;
+  }
+  .ring{position:relative;width:96px;height:96px;flex:0 0 auto}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .pct{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:20px;
+  }
+  .dash-meta{flex:1;min-width:200px}
+  .dash-meta b{font-size:18px}
+  .dash-meta span{color:var(--muted)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button.ctrl{
+    background:var(--panel-2);color:var(--text);border:1px solid var(--line);
+    padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s;
+  }
+  button.ctrl:hover{border-color:var(--accent);color:var(--accent)}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .chip{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+    padding:6px 13px;border-radius:20px;cursor:pointer;font-size:13px;transition:.15s;
+  }
+  .chip.active{background:var(--accent);color:#0b1020;border-color:var(--accent);font-weight:600}
+
+  .topic{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    margin-bottom:16px;overflow:hidden;
+  }
+  .topic-head{
+    display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;
+  }
+  .topic-head:hover{background:var(--panel-2)}
+  .t-title{flex:1}
+  .t-title h2{font-size:18px}
+  .t-title p{color:var(--muted);font-size:13px;margin-top:3px}
+  .t-prog{font-size:12px;color:var(--muted);white-space:nowrap}
+  .bar{height:6px;background:var(--panel-2);border-radius:6px;overflow:hidden;width:120px;margin-top:6px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0;transition:width .3s}
+  .chev{transition:transform .2s;color:var(--muted)}
+  .topic.open .chev{transform:rotate(90deg)}
+
+  .topic-body{display:none;padding:0 20px 14px}
+  .topic.open .topic-body{display:block}
+
+  .patterns{
+    background:var(--panel-2);border-radius:10px;padding:14px 16px;margin:6px 0 14px;
+    font-size:13.5px;
+  }
+  .patterns h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:8px}
+  .patterns ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 18px}
+  .patterns li{color:var(--muted);position:relative;padding-left:16px}
+  .patterns li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+
+  .prob{
+    display:flex;align-items:center;gap:12px;padding:10px 4px;border-top:1px solid var(--line);
+  }
+  .prob:first-of-type{border-top:none}
+  .prob input{width:18px;height:18px;accent-color:var(--accent-2);cursor:pointer;flex:0 0 auto}
+  .prob a{color:var(--text);text-decoration:none;flex:1;font-size:14.5px}
+  .prob a:hover{color:var(--accent);text-decoration:underline}
+  .prob.done a{color:var(--muted);text-decoration:line-through}
+  .star{
+    background:none;border:none;cursor:pointer;font-size:18px;line-height:1;
+    color:#4a5163;flex:0 0 auto;padding:2px 4px;transition:.15s;
+  }
+  .star:hover{transform:scale(1.2)}
+  .star.on{color:#f2cc60}
+  .topic-tag{font-size:11px;color:var(--accent);background:rgba(110,168,254,.12);padding:2px 9px;border-radius:20px;white-space:nowrap;margin-right:2px}
+  .empty{color:var(--muted);padding:30px;text-align:center;font-size:14px}
+  .del{
+    background:none;border:none;cursor:pointer;font-size:14px;color:#4a5163;flex:0 0 auto;
+    padding:2px 4px;transition:.15s;
+  }
+  .del:hover{color:var(--hard);transform:scale(1.2)}
+  .mine{font-size:10px;color:var(--accent-2);background:rgba(126,231,135,.12);padding:2px 7px;border-radius:20px;white-space:nowrap}
+
+  .addbox{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:20px;display:none;
+  }
+  .addbox.open{display:block}
+  .addbox h3{font-size:14px;margin-bottom:14px}
+  .addgrid{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .field input,.field select{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    padding:9px 11px;border-radius:9px;font-size:14px;font-family:inherit;
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+  .field.grow{flex:1;min-width:200px}
+  .field.grow input{width:100%}
+  button.add{
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#0b1020;border:none;
+    padding:10px 18px;border-radius:9px;cursor:pointer;font-weight:700;font-size:14px;
+  }
+  button.add:hover{filter:brightness(1.08)}
+  .addnote{color:var(--hard);font-size:12px;margin-top:8px;min-height:14px}
+  .tag{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .tag.Easy{background:rgba(126,231,135,.15);color:var(--easy)}
+  .tag.Medium{background:rgba(242,204,96,.15);color:var(--medium)}
+  .tag.Hard{background:rgba(255,123,114,.15);color:var(--hard)}
+
+  footer{max-width:1080px;margin:30px auto 0;padding:0 24px;color:var(--muted);font-size:13px}
+  a.tip{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>DSA Prep for Startup Coding Rounds</h1>
+  <p class="sub">A focused checklist of the topics, patterns, and problems that come up most in startup interviews. Tick problems as you solve them — your progress is saved automatically in this browser.</p>
+</header>
+
+<div class="wrap">
+  <div class="dash">
+    <div class="ring">
+      <svg width="96" height="96">
+        <circle cx="48" cy="48" r="42" stroke="#2a2f3d" stroke-width="8" fill="none"/>
+        <circle id="ringFill" cx="48" cy="48" r="42" stroke="#6ea8fe" stroke-width="8" fill="none"
+                stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+      </svg>
+      <div class="pct" id="pctText">0%</div>
+    </div>
+    <div class="dash-meta">
+      <b id="solvedCount">0 / 0 solved</b><br>
+      <span id="encourage">Pick a topic and start with the Easy problems to warm up.</span>
+    </div>
+    <div class="controls">
+      <button class="ctrl" onclick="toggleAdd()">+ Add problem</button>
+      <button class="ctrl" onclick="expandAll(true)">Expand all</button>
+      <button class="ctrl" onclick="expandAll(false)">Collapse all</button>
+      <button class="ctrl" onclick="resetProgress()">Reset progress</button>
+    </div>
+  </div>
+
+  <div class="addbox" id="addbox">
+    <h3>Add your own problem</h3>
+    <div class="addgrid">
+      <div class="field grow">
+        <label for="aTitle">Problem name</label>
+        <input id="aTitle" type="text" placeholder="e.g. Trapping Rain Water">
+      </div>
+      <div class="field grow">
+        <label for="aUrl">Link (optional)</label>
+        <input id="aUrl" type="text" placeholder="https://leetcode.com/problems/...">
+      </div>
+      <div class="field">
+        <label for="aDiff">Difficulty</label>
+        <select id="aDiff">
+          <option>Easy</option><option selected>Medium</option><option>Hard</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="aTopic">Topic</label>
+        <select id="aTopic"></select>
+      </div>
+      <button class="add" onclick="addProblem()">Add</button>
+    </div>
+    <div class="addnote" id="addNote"></div>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="chip active" data-f="all">All topics</div>
+    <div class="chip" data-f="core">Must-know (core)</div>
+    <div class="chip" data-f="incomplete">Unfinished only</div>
+    <div class="chip" data-f="revisit">★ Revisit list <span id="revCount"></span></div>
+  </div>
+
+  <div id="topics"></div>
+
+  <footer>
+    Tip: in a startup round, talk through brute force → optimize → state time/space complexity → code → test edge cases.
+    Aim for ~2 problems/day. Problems link to <a class="tip" href="https://leetcode.com" target="_blank" rel="noopener">LeetCode</a>.
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:"arrays", core:true, name:"Arrays & Hashing",
+    desc:"The most common warm-up category. Master these first.",
+    patterns:["Frequency counting with hash maps","Prefix sums","In-place manipulation","Set/seen lookups for O(1) checks"],
+    problems:[
+      {t:"Two Sum",d:"Easy",u:"https://leetcode.com/problems/two-sum/"},
+      {t:"Contains Duplicate",d:"Easy",u:"https://leetcode.com/problems/contains-duplicate/"},
+      {t:"Valid Anagram",d:"Easy",u:"https://leetcode.com/problems/valid-anagram/"},
+      {t:"Group Anagrams",d:"Medium",u:"https://leetcode.com/problems/group-anagrams/"},
+      {t:"Top K Frequent Elements",d:"Medium",u:"https://leetcode.com/problems/top-k-frequent-elements/"},
+      {t:"Product of Array Except Self",d:"Medium",u:"https://leetcode.com/problems/product-of-array-except-self/"},
+    ]
+  },
+  {
+    id:"twopointers", core:true, name:"Two Pointers & Sliding Window",
+    desc:"Hugely favored at startups — clean, optimal, easy to discuss.",
+    patterns:["Opposite-end pointers (sorted array)","Fast/slow pointers","Fixed-size window","Variable window with shrink condition"],
+    problems:[
+      {t:"Valid Palindrome",d:"Easy",u:"https://leetcode.com/problems/valid-palindrome/"},
+      {t:"Two Sum II (sorted)",d:"Medium",u:"https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/"},
+      {t:"3Sum",d:"Medium",u:"https://leetcode.com/problems/3sum/"},
+      {t:"Container With Most Water",d:"Medium",u:"https://leetcode.com/problems/container-with-most-water/"},
+      {t:"Longest Substring Without Repeating Characters",d:"Medium",u:"https://leetcode.com/problems/longest-substring-without-repeating-characters/"},
+      {t:"Minimum Window Substring",d:"Hard",u:"https://leetcode.com/problems/minimum-window-substring/"},
+    ]
+  },
+  {
+    id:"stack", core:false, name:"Stack",
+    desc:"Parsing, matching, and monotonic-stack tricks.",
+    patterns:["Matching pairs (brackets)","Monotonic stack for next-greater","Evaluate expressions","Backtrack with stack state"],
+    problems:[
+      {t:"Valid Parentheses",d:"Easy",u:"https://leetcode.com/problems/valid-parentheses/"},
+      {t:"Min Stack",d:"Medium",u:"https://leetcode.com/problems/min-stack/"},
+      {t:"Evaluate Reverse Polish Notation",d:"Medium",u:"https://leetcode.com/problems/evaluate-reverse-polish-notation/"},
+      {t:"Daily Temperatures",d:"Medium",u:"https://leetcode.com/problems/daily-temperatures/"},
+    ]
+  },
+  {
+    id:"binsearch", core:true, name:"Binary Search",
+    desc:"Know the template cold — off-by-one bugs cost offers.",
+    patterns:["Classic search on sorted array","Search on answer space","Find boundary / first-or-last","Rotated array handling"],
+    problems:[
+      {t:"Binary Search",d:"Easy",u:"https://leetcode.com/problems/binary-search/"},
+      {t:"Search a 2D Matrix",d:"Medium",u:"https://leetcode.com/problems/search-a-2d-matrix/"},
+      {t:"Find Minimum in Rotated Sorted Array",d:"Medium",u:"https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/"},
+      {t:"Search in Rotated Sorted Array",d:"Medium",u:"https://leetcode.com/problems/search-in-rotated-sorted-array/"},
+      {t:"Koko Eating Bananas",d:"Medium",u:"https://leetcode.com/problems/koko-eating-bananas/"},
+    ]
+  },
+  {
+    id:"linkedlist", core:true, name:"Linked Lists",
+    desc:"Pointer manipulation under pressure. Practice until automatic.",
+    patterns:["Dummy head node","Fast/slow for cycle & midpoint","Reverse in place","Merge two lists"],
+    problems:[
+      {t:"Reverse Linked List",d:"Easy",u:"https://leetcode.com/problems/reverse-linked-list/"},
+      {t:"Merge Two Sorted Lists",d:"Easy",u:"https://leetcode.com/problems/merge-two-sorted-lists/"},
+      {t:"Linked List Cycle",d:"Easy",u:"https://leetcode.com/problems/linked-list-cycle/"},
+      {t:"Remove Nth Node From End of List",d:"Medium",u:"https://leetcode.com/problems/remove-nth-node-from-end-of-list/"},
+      {t:"Reorder List",d:"Medium",u:"https://leetcode.com/problems/reorder-list/"},
+    ]
+  },
+  {
+    id:"trees", core:true, name:"Trees & BSTs",
+    desc:"Recursion fluency is tested here constantly.",
+    patterns:["DFS (pre/in/post order)","BFS level-order with queue","BST invariants","Divide & conquer on subtrees"],
+    problems:[
+      {t:"Invert Binary Tree",d:"Easy",u:"https://leetcode.com/problems/invert-binary-tree/"},
+      {t:"Maximum Depth of Binary Tree",d:"Easy",u:"https://leetcode.com/problems/maximum-depth-of-binary-tree/"},
+      {t:"Binary Tree Level Order Traversal",d:"Medium",u:"https://leetcode.com/problems/binary-tree-level-order-traversal/"},
+      {t:"Validate Binary Search Tree",d:"Medium",u:"https://leetcode.com/problems/validate-binary-search-tree/"},
+      {t:"Lowest Common Ancestor of a BST",d:"Medium",u:"https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/"},
+    ]
+  },
+  {
+    id:"heap", core:false, name:"Heaps / Priority Queue",
+    desc:"Top-K and streaming problems — quick wins once you know the API.",
+    patterns:["Min/max heap for top-K","Two heaps for median","Merge K sorted streams","Scheduling by priority"],
+    problems:[
+      {t:"Kth Largest Element in a Stream",d:"Easy",u:"https://leetcode.com/problems/kth-largest-element-in-a-stream/"},
+      {t:"Last Stone Weight",d:"Easy",u:"https://leetcode.com/problems/last-stone-weight/"},
+      {t:"K Closest Points to Origin",d:"Medium",u:"https://leetcode.com/problems/k-closest-points-to-origin/"},
+      {t:"Find Median from Data Stream",d:"Hard",u:"https://leetcode.com/problems/find-median-from-data-stream/"},
+    ]
+  },
+  {
+    id:"graphs", core:true, name:"Graphs",
+    desc:"Grid problems and BFS/DFS show up at most startups.",
+    patterns:["BFS/DFS on grids & adjacency lists","Connected components / flood fill","Topological sort","Union-Find (DSU)"],
+    problems:[
+      {t:"Number of Islands",d:"Medium",u:"https://leetcode.com/problems/number-of-islands/"},
+      {t:"Clone Graph",d:"Medium",u:"https://leetcode.com/problems/clone-graph/"},
+      {t:"Course Schedule",d:"Medium",u:"https://leetcode.com/problems/course-schedule/"},
+      {t:"Pacific Atlantic Water Flow",d:"Medium",u:"https://leetcode.com/problems/pacific-atlantic-water-flow/"},
+      {t:"Rotting Oranges",d:"Medium",u:"https://leetcode.com/problems/rotting-oranges/"},
+    ]
+  },
+  {
+    id:"backtracking", core:false, name:"Backtracking",
+    desc:"Generate-all problems. Learn the recursion template.",
+    patterns:["Choose / explore / un-choose","Subsets & permutations","Pruning invalid paths","Grid path search"],
+    problems:[
+      {t:"Subsets",d:"Medium",u:"https://leetcode.com/problems/subsets/"},
+      {t:"Combination Sum",d:"Medium",u:"https://leetcode.com/problems/combination-sum/"},
+      {t:"Permutations",d:"Medium",u:"https://leetcode.com/problems/permutations/"},
+      {t:"Word Search",d:"Medium",u:"https://leetcode.com/problems/word-search/"},
+    ]
+  },
+  {
+    id:"dp", core:true, name:"Dynamic Programming",
+    desc:"The differentiator. Start 1-D, then 2-D. Don't skip.",
+    patterns:["1-D DP (climbing/house robber)","2-D grid DP","Knapsack variants","Longest subsequence / edit distance"],
+    problems:[
+      {t:"Climbing Stairs",d:"Easy",u:"https://leetcode.com/problems/climbing-stairs/"},
+      {t:"House Robber",d:"Medium",u:"https://leetcode.com/problems/house-robber/"},
+      {t:"Coin Change",d:"Medium",u:"https://leetcode.com/problems/coin-change/"},
+      {t:"Longest Increasing Subsequence",d:"Medium",u:"https://leetcode.com/problems/longest-increasing-subsequence/"},
+      {t:"Unique Paths",d:"Medium",u:"https://leetcode.com/problems/unique-paths/"},
+      {t:"Longest Common Subsequence",d:"Medium",u:"https://leetcode.com/problems/longest-common-subsequence/"},
+    ]
+  },
+  {
+    id:"greedy", core:false, name:"Greedy & Intervals",
+    desc:"Sorting + a smart choice. Common in product-style rounds.",
+    patterns:["Sort then sweep","Interval merging/overlap","Local optimal → global","Reach/jump problems"],
+    problems:[
+      {t:"Maximum Subarray",d:"Medium",u:"https://leetcode.com/problems/maximum-subarray/"},
+      {t:"Merge Intervals",d:"Medium",u:"https://leetcode.com/problems/merge-intervals/"},
+      {t:"Insert Interval",d:"Medium",u:"https://leetcode.com/problems/insert-interval/"},
+      {t:"Jump Game",d:"Medium",u:"https://leetcode.com/problems/jump-game/"},
+    ]
+  },
+];
+
+const STORE_KEY = "dsa_prep_progress_v1";
+const OPEN_KEY  = "dsa_prep_open_v1";
+const REV_KEY   = "dsa_prep_revisit_v1";
+const CUSTOM_KEY= "dsa_prep_custom_v1";
+let solved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+let openState = JSON.parse(localStorage.getItem(OPEN_KEY) || "{}");
+let revisit = JSON.parse(localStorage.getItem(REV_KEY) || "{}");
+let custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
+let filter = "all";
+
+function pid(topic,i){return topic.id+"#"+i;}
+function save(){localStorage.setItem(STORE_KEY, JSON.stringify(solved));}
+function saveOpen(){localStorage.setItem(OPEN_KEY, JSON.stringify(openState));}
+function saveRev(){localStorage.setItem(REV_KEY, JSON.stringify(revisit));}
+function saveCustom(){localStorage.setItem(CUSTOM_KEY, JSON.stringify(custom));}
+
+// built-in + user-added rows for a topic, each: {p, id, isCustom}
+function rowsFor(topic){
+  const rows = topic.problems.map((p,i)=>({p, id:pid(topic,i), isCustom:false}));
+  custom.filter(c=>c.topic===topic.id).forEach(c=>rows.push({p:c, id:c.id, isCustom:true}));
+  return rows;
+}
+function allRows(){
+  const out=[];
+  DATA.forEach(t=>rowsFor(t).forEach(r=>out.push({topic:t, ...r})));
+  return out;
+}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function probRow(row, topicName, showTopicTag){
+  const {p, id, isCustom} = row;
+  const isDone = !!solved[id];
+  const isRev = !!revisit[id];
+  const title = esc(p.t);
+  const link = p.u ? `<a href="${esc(p.u)}" target="_blank" rel="noopener">${title}</a>`
+                   : `<a style="cursor:default" title="No link added">${title}</a>`;
+  return `<div class="prob ${isDone?'done':''}">
+    <input type="checkbox" data-check="${id}" ${isDone?'checked':''} title="Mark as solved">
+    ${link}
+    ${isCustom?'<span class="mine">added by you</span>':''}
+    ${showTopicTag?`<span class="topic-tag">${esc(topicName)}</span>`:''}
+    <span class="tag ${p.d}">${p.d}</span>
+    <button class="star ${isRev?'on':''}" data-star="${id}" title="${isRev?'Remove from revisit list':'Mark to revisit later'}">${isRev?'★':'☆'}</button>
+    ${isCustom?`<button class="del" data-del="${id}" title="Delete this problem">✕</button>`:''}
+  </div>`;
+}
+
+function renderRevisit(root){
+  const items = allRows().filter(r=>revisit[r.id]);
+  if(items.length===0){
+    root.innerHTML = `<div class="empty">No questions flagged yet. Tap the ☆ next to any problem to add it here for later review.</div>`;
+    return;
+  }
+  const el = document.createElement("div");
+  el.className = "topic open";
+  el.innerHTML = `
+    <div class="topic-head" style="cursor:default">
+      <div class="t-title">
+        <h2>★ Questions to revisit</h2>
+        <p>Everything you've flagged, gathered in one place. Un-star to remove.</p>
+      </div>
+      <div class="t-prog">${items.length} flagged</div>
+    </div>
+    <div class="topic-body" style="display:block">
+      ${items.map(r=>probRow(r, r.topic.name, true)).join("")}
+    </div>`;
+  root.appendChild(el);
+}
+
+function render(){
+  const root = document.getElementById("topics");
+  root.innerHTML = "";
+
+  if(filter==="revisit"){
+    renderRevisit(root);
+    wireEvents();
+    updateDash();
+    return;
+  }
+
+  DATA.forEach(topic=>{
+    const rows = rowsFor(topic);
+    const done = rows.filter(r=>solved[r.id]).length;
+    const tot = rows.length;
+    if(filter==="core" && !topic.core) return;
+    if(filter==="incomplete" && done===tot) return;
+
+    const el = document.createElement("div");
+    el.className = "topic" + (openState[topic.id] ? " open":"");
+    el.innerHTML = `
+      <div class="topic-head" data-toggle="${topic.id}">
+        <div class="chev">▶</div>
+        <div class="t-title">
+          <h2>${topic.name}${topic.core?' &nbsp;<span style="font-size:11px;color:var(--accent-2)">core</span>':''}</h2>
+          <p>${topic.desc}</p>
+        </div>
+        <div class="t-prog">${done}/${tot}
+          <div class="bar"><i style="width:${tot?Math.round(done/tot*100):0}%"></i></div>
+        </div>
+      </div>
+      <div class="topic-body">
+        <div class="patterns">
+          <h3>Key patterns</h3>
+          <ul>${topic.patterns.map(p=>`<li>${p}</li>`).join("")}</ul>
+        </div>
+        ${rows.map(r=>probRow(r, topic.name, false)).join("")}
+      </div>`;
+    root.appendChild(el);
+  });
+  wireEvents();
+  updateDash();
+}
+
+function wireEvents(){
+  document.querySelectorAll("[data-toggle]").forEach(h=>{
+    h.addEventListener("click",e=>{
+      if(e.target.closest("a")||e.target.closest("input")||e.target.closest("button")) return;
+      const id = h.getAttribute("data-toggle");
+      openState[id] = !openState[id];
+      saveOpen(); render();
+    });
+  });
+  document.querySelectorAll("[data-check]").forEach(c=>{
+    c.addEventListener("change",()=>{
+      const id = c.getAttribute("data-check");
+      if(c.checked) solved[id]=true; else delete solved[id];
+      save(); render();
+    });
+  });
+  document.querySelectorAll("[data-star]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const id = b.getAttribute("data-star");
+      if(revisit[id]) delete revisit[id]; else revisit[id]=true;
+      saveRev(); render();
+    });
+  });
+  document.querySelectorAll("[data-del]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const id = b.getAttribute("data-del");
+      const item = custom.find(c=>c.id===id);
+      if(item && confirm(`Delete "${item.t}" from your list?`)){
+        custom = custom.filter(c=>c.id!==id);
+        delete solved[id]; delete revisit[id];
+        saveCustom(); save(); saveRev(); render();
+      }
+    });
+  });
+}
+
+function updateDash(){
+  const rows = allRows();
+  const total = rows.length;
+  const done = rows.filter(r=>solved[r.id]).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById("pctText").textContent = pct+"%";
+  document.getElementById("solvedCount").textContent = `${done} / ${total} solved`;
+  const circ = 2*Math.PI*42;
+  document.getElementById("ringFill").setAttribute("stroke-dashoffset", circ*(1-pct/100));
+  const msgs = [
+    "Pick a topic and start with the Easy problems to warm up.",
+    "Nice start — consistency beats cramming.",
+    "You're building momentum. Keep going!",
+    "Solid progress. Try a Medium you've been avoiding.",
+    "More than halfway — start timing yourself now.",
+    "Almost there. Review patterns you found tricky.",
+    "Interview-ready. Do mock rounds out loud!"
+  ];
+  document.getElementById("encourage").textContent = msgs[Math.min(msgs.length-1, Math.floor(pct/15))];
+  const rc = Object.keys(revisit).length;
+  document.getElementById("revCount").textContent = rc ? "("+rc+")" : "";
+}
+
+document.querySelectorAll(".chip").forEach(ch=>{
+  ch.addEventListener("click",()=>{
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+    ch.classList.add("active");
+    filter = ch.getAttribute("data-f");
+    render();
+  });
+});
+
+function expandAll(open){
+  DATA.forEach(t=>openState[t.id]=open);
+  saveOpen(); render();
+}
+function resetProgress(){
+  if(confirm("Reset all solved checkmarks? This cannot be undone.")){
+    solved = {}; save(); render();
+  }
+}
+
+// populate the topic dropdown in the add form
+(function(){
+  const sel = document.getElementById("aTopic");
+  sel.innerHTML = DATA.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+})();
+
+function toggleAdd(){
+  document.getElementById("addbox").classList.toggle("open");
+}
+
+function addProblem(){
+  const note = document.getElementById("addNote");
+  const tEl = document.getElementById("aTitle");
+  const uEl = document.getElementById("aUrl");
+  const title = tEl.value.trim();
+  let url = uEl.value.trim();
+  if(!title){ note.textContent = "Please enter a problem name."; tEl.focus(); return; }
+  if(url && !/^https?:\/\//i.test(url)){ url = "https://" + url; }
+  custom.push({
+    id: "c_" + Date.now() + "_" + Math.random().toString(36).slice(2,6),
+    topic: document.getElementById("aTopic").value,
+    t: title,
+    u: url,
+    d: document.getElementById("aDiff").value
+  });
+  saveCustom();
+  tEl.value = ""; uEl.value = ""; note.textContent = "";
+  const topicId = document.getElementById("aTopic").value;
+  openState[topicId] = true; saveOpen();
+  if(filter==="incomplete" || filter==="revisit"){ filter="all"; setActiveChip("all"); }
+  render();
+}
+
+function setActiveChip(f){
+  document.querySelectorAll(".chip").forEach(c=>{
+    c.classList.toggle("active", c.getAttribute("data-f")===f);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
